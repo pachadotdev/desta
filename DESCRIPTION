@@ -1,0 +1,29 @@
+Package: desta
+Type: Package
+Title: The Design of Trade Agreements Database
+Version: 0.1.0
+Authors@R: c(
+    person("Mauricio", "Vargas", 
+     role = c("aut","cre"),
+     email = "mavargas11@uc.cl", 
+     comment = c(ORCID = "0000-0003-1017-7574")),
+    person(family = "DESTA Team",
+     role = "dtc")
+    )
+Description: The Design of Trade Agreements (DESTA) project aims to 
+    systematically collect data on various types of preferential trade 
+    agreements (PTAs). These may be customs unions, free trade agreements or 
+    partial free trade agreements (or what economists often call economic 
+    integration agreements). So far we have manually coded design features for 
+    more than 710 agreements (as of October 2020). These include fine-grained 
+    data with information on a large set of design features ranging from market 
+    access commitments, flexibility instruments, enforcement tools, to 
+    non-trade issues for the time period between 1948 and 2019.
+License: CC0
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    R (>= 2.10)
+RoxygenNote: 7.1.2
+Suggests: 
+    tibble
