@@ -56,71 +56,55 @@ if (!file.exists(withdrawals_dyads_rda)) {
 # computed tables ----
 
 treaties <- treaties_dyads %>%
-  select(year, country1, country2, entry_type, base_treaty) %>%
+  select(year, country1, country2, entry_type) %>%
   filter(entry_type == "base_treaty") %>%
-  rowwise() %>%
-  mutate(c1 = min(country1, country2), c2 = max(country1, country2)) %>%
-  ungroup() %>%
-  select(year, c1, c2, base_treaty) %>%
+  mutate(c1 = pmin(country1, country2), c2 = pmax(country1, country2)) %>%
+  select(year, c1, c2) %>%
   distinct() %>%
-  group_by(c1, c2, base_treaty) %>%
+  group_by(c1, c2) %>%
   summarise(year = min(year)) %>%
   mutate(rta = 1)
 
 withdrawals <- withdrawals_dyads %>%
-  select(year, country1, country2, entry_type, base_treaty) %>%
-  mutate_if(is.factor, as.character) %>%
-  filter(entry_type == "withdrawal") %>%
-  rowwise() %>%
-  mutate(c1 = min(country1, country2), c2 = max(country1, country2)) %>%
+  select(year, country1, country2, entry_type) %>%
+  mutate(c1 = pmin(country1, country2), c2 = pmax(country1, country2)) %>%
   ungroup() %>%
-  select(year, c1, c2, base_treaty) %>%
+  select(year, c1, c2) %>%
   distinct() %>%
-  group_by(c1, c2, base_treaty) %>%
+  group_by(c1, c2) %>%
   summarise(year = min(year)) %>%
   mutate(rta = -1)
 
 valid_rta <- crossing(
   year = min(treaties$year, withdrawals$year):max(treaties$year, withdrawals$year),
-  treaties %>%
-    select(c1, c2, base_treaty) %>%
-    bind_rows(
-      withdrawals %>% select(c1, c2, base_treaty)
-    ) %>%
-    distinct()
+  treaties %>% select(c1, c2)
   ) %>%
   left_join(
-    treaties %>%
-      bind_rows(withdrawals)
+    treaties
   ) %>%
-  arrange(year, c1, c2, base_treaty) %>%
-  group_by(c1, c2, base_treaty) %>%
-  fill(rta, .direction = "down") %>%
-  ungroup()
-
-valid_rta <- valid_rta %>%
-  group_by(c1, c2, base_treaty) %>%
-  # filter(c1 == "chl", c2 == "chn") %>%
-  mutate(
-    rta = ifelse(is.na(rta), 0, rta),
-    rta = ifelse(is.na(lag(rta)), rta, cumsum(rta)),
-    rta = case_when(
-      is.na(lag(rta)) ~ rta,
-      rta > lag(rta) & !is.na(lag(rta)) ~ 1,
-      rta <= lag(rta) & !is.na(lag(rta)) ~ 0
-    )
+  left_join(
+    withdrawals %>% rename(wrta = rta)
   )
 
 valid_rta <- valid_rta %>%
-  ungroup() %>%
-  mutate_if(is.numeric, as.integer)
+  group_by(c1, c2) %>%
+  fill(rta, .direction = "down") %>%
+  fill(wrta, .direction = "down") %>%
+  ungroup()
 
 valid_rta <- valid_rta %>%
-  group_by(year, c1, c2) %>%
-  summarise(rta = sum(rta)) %>%
-  rowwise() %>%
-  mutate(rta = min(1, rta)) %>%
-  ungroup()
+  mutate(
+    rta = if_else(is.na(rta), 0, rta),
+    wrta = if_else(is.na(wrta), 0, wrta)
+  ) %>%
+  group_by(c1,c2) %>%
+  mutate(res = rta + wrta)
+
+valid_rta <- valid_rta %>%
+  ungroup() %>%
+  select(-c(rta, wrta)) %>%
+  rename(rta = res) %>%
+  mutate_if(is.numeric, as.integer)
 
 current_treaties_dyads <- valid_rta %>%
   rename(
