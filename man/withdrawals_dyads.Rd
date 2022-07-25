@@ -2,7 +2,7 @@
 \alias{withdrawals_dyads}
 \docType{data}
 \title{
-  PTAs Withdrawals in Dyadic Form
+  List of Withdrawals (Dyadic)
 }
 \description{
 Withdrawals from previously subscribed agreements, which were are included as

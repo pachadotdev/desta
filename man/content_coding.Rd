@@ -1,8 +1,8 @@
-\name{treaties_dyads}
-\alias{treaties_dyads}
+\name{content_coding}
+\alias{content_coding}
 \docType{data}
 \title{
-  List of Treaties (Dyadic)
+  Content Coding (Market Access and Services)
 }
 \description{
 Partial scope agreements are included as soon as they liberalize at least some
@@ -12,11 +12,11 @@ Partial scope agreements are included as soon as they liberalize at least some
  are included). Neither considers agreements with tiny island states such as
  the Marshall Islands or Tuvalu.
 }
-\usage{treaties_dyads}
+\usage{treaties}
 \format{
-  A data frame with 18,329 observations indicating all the pairs involved in
-  the different agreements and their characteristics. Please see the detailed
-  description in the DESTA Codebook and Indices. Both files can be obtained from
+  A data frame with 781 observations indicating agreements and their
+  characteristics. Please see the detailed description
+  in the DESTA Codebook and Indices. Both files can be obtained from
   https://www.designoftradeagreements.org/downloads/.
 }
 \source{
@@ -26,6 +26,6 @@ Downloaded from https://www.designoftradeagreements.org/.
 Dür, Andreas, Leonardo Baccini and Manfred Elsig. 2014. "The Design of International Trade Agreements: Introducing a New Database". The Review of International Organizations, 9(3): 353-375.
 }
 \examples{
-treaties_dyads
+treaties
 }
 \keyword{datasets}

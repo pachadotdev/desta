@@ -2,7 +2,7 @@
 \alias{treaties}
 \docType{data}
 \title{
-  PTAs in Compact Form
+  List of Treaties
 }
 \description{
 Partial scope agreements are included as soon as they liberalize at least some
