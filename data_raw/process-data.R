@@ -80,7 +80,9 @@ if (!file.exists(content_coding_rda)) {
 treaties2 <- treaties_dyads %>%
   select(number, year, country1, country2, entry_type) %>%
   filter(entry_type == "base_treaty") %>%
-  mutate(c1 = pmin(country1, country2), c2 = pmax(country1, country2))
+  mutate(c1 = pmin(country1, country2), c2 = pmax(country1, country2)) %>%
+  mutate(rta = 1) %>%
+  select(year, c1, c2, rta, number)
 
 # filter for full FTAs!!!
 
@@ -91,21 +93,15 @@ treaties2 <- treaties2 %>%
       filter(mar_typedepth == 2)
   )
 
-treaties2 <- treaties2 %>%
-  select(year, c1, c2) %>%
-  distinct() %>%
+treaties2 %>%
   group_by(c1, c2) %>%
-  summarise(year = min(year)) %>%
-  mutate(rta = 1)
+  count() %>%
+  filter(n > 1)
 
 withdrawals2 <- withdrawals_dyads %>%
-  select(year, country1, country2, entry_type) %>%
+  select(year, country1, country2, number) %>%
   mutate(c1 = pmin(country1, country2), c2 = pmax(country1, country2)) %>%
-  ungroup() %>%
-  select(year, c1, c2) %>%
-  distinct() %>%
-  group_by(c1, c2) %>%
-  summarise(year = min(year)) %>%
+  select(year, c1, c2, number) %>%
   mutate(rta = -1)
 
 in_force_ftas_dyads <- crossing(
@@ -145,5 +141,48 @@ in_force_ftas_dyads <- in_force_ftas_dyads %>%
     country2 = c2,
     in_force_fta = rta
   )
+
+in_force_ftas_dyads %>%
+  filter(in_force_fta < 0)
+
+in_force_ftas_dyads %>%
+  filter(!is.na(number)) %>%
+  distinct(country1, country2, number) %>%
+  group_by(country1, country2) %>%
+  count() %>%
+  filter(n > 1)
+
+in_force_ftas_dyads <- in_force_ftas_dyads %>%
+  select(-mar_typedepth) %>%
+  group_by(country1, country2) %>%
+  fill(number, .direction = "down")
+
+in_force_ftas_dyads <- in_force_ftas_dyads %>%
+  filter(!is.na(number)) %>%
+  pivot_wider(names_from = "number", values_from = in_force_fta,
+              names_prefix = "n") %>%
+  mutate(year = as.character(year))
+
+in_force_ftas_dyads$in_force_fta <- rowSums(Filter(is.integer, in_force_ftas_dyads), na.rm = T)
+
+in_force_ftas_dyads <- in_force_ftas_dyads %>%
+  select(year:country2, in_force_fta)
+
+in_force_ftas_dyads %>%
+  filter(in_force_fta < 0)
+
+in_force_ftas_dyads %>%
+  filter(in_force_fta > 1)
+
+in_force_ftas_dyads <- in_force_ftas_dyads %>%
+  mutate(in_force_fta = as.integer(ifelse(in_force_fta > 1, 1, in_force_fta)))
+
+in_force_ftas_dyads <- crossing(
+  year = min(in_force_ftas_dyads$year):max(in_force_ftas_dyads$year),
+  in_force_ftas_dyads %>%
+    select(country1, country2)
+) %>%
+  left_join(in_force_ftas_dyads %>% mutate(year = as.numeric(year))) %>%
+  mutate(in_force_fta = as.integer(if_else(is.na(in_force_fta), 0L, in_force_fta)))
 
 use_data(in_force_ftas_dyads, overwrite = T)
