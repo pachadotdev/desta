@@ -1,0 +1,47 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# desta
+
+The goal of desta is to provide convenient access to 
+The Design of Trade Agreements Database (DESTA).
+
+## Installation
+
+You can install the development version of desta from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("remotes")
+remotes::install_github("pachadotdev/desta")
+```
+
+## Example
+
+This is a basic example which shows you how to see the Chile-US dyad:
+
+```{r example, message=FALSE, warning=FALSE}
+library(desta)
+library(dplyr)
+
+treaties_dyads %>% 
+  filter(
+    country1 == "Chile",
+    country2 == "United States",
+    year >= 2000
+  )
+```
+
+All the tables within the package are documented. Check the package
+documentation from RStudio help pane.
